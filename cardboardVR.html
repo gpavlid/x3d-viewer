@@ -1,0 +1,151 @@
+<!--
+  Generic x3d viewer to display 3D content on the web
+  This code displays a single X3D file on a web browser 
+  and has the option to open another browser window 
+  to display a twin view of the model for cardboard VR usage
+  
+  usage: view3d.html?the_model=MODEL.X3D&the_cardboardmodel=MODEL_LOW.X3D
+  * it is adviced to use a low complexity model for the cardboard view
+  
+  parts of this code are based on the code example provided @
+  http://realism.com/x3d-examples/HTML5-Fall2014/stereo/kelpie.html
+  
+  © 2017 George Pavlidis
+-->
+<html>
+
+<head>
+<meta encoding="utf-8">
+<script src="http://www.x3dom.org/x3dom/release/x3dom.js"></script>
+<link rel="stylesheet" href="http://www.x3dom.org/x3dom/release/x3dom.css">
+
+<style>
+body {
+	margin:0;
+	padding:0;
+	background-color:#000000;
+	background-color:#000000;
+}
+.stereo-view, .stereo-view x3d {
+	float:left;
+}
+</style>
+
+<script>
+var the_model;
+var left_id='left_view';
+var right_id='right_view';
+
+function getUrlVars() {
+var vars = {};
+var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+vars[key] = value;
+});
+return vars;
+}
+var the_model = unescape(getUrlVars()["the_cardboard_model"]);
+
+// Fit the model to screen
+function fitCamera(the_view) {
+	var x3dElem = document.getElementById(the_view);
+	x3dElem.runtime.fitAll();
+	x3dElem.addEventListener("downloadsfinished", function() {x3dElem.runtime.fitAll();});
+}
+</script>
+
+<script>
+// ******************************************
+// --> Based on the code example provided @ http://realism.com/x3d-examples/HTML5-Fall2014/stereo/kelpie.html
+var deviceOrientation = 'portrait';
+notFirstTime = false;
+while (deviceOrientation == 'portrait') {
+	insideWidth = window.innerWidth;
+	insideHeight = window.innerHeight;
+	if (insideWidth > insideHeight) {deviceOrientation = 'landscape';}
+	if (notFirstTime) {alert ("Please orient the device in landscape and then press the 'OK' button");}
+	notFirstTime = true;
+}
+x3dWidth = Math.floor(insideWidth/2) - 6; 
+x3dHeight = insideHeight - 2;	
+// ******************************************
+</script>
+</head>
+
+<body>
+
+<div class='stereo-view'>
+<!-- LEFT EYE VIEWPORT -->
+<script>
+document.write("<x3d id='"+left_id+"' showStat='false' showLog='false' x='0px' y='0px' width='"+x3dWidth+"px' height='"+x3dHeight+"px'>");
+</script>
+<scene>
+<navigationInfo type='"EXAMINE"'></navigationInfo>
+<transform translation='0 0 10' rotation='0 1 0 0'>		
+<viewpoint DEF='Viewpoint' id='x3d_viewpointL' position='-.1 0 0' orientation='0 1 0 -.05'></viewpoint>
+</transform>
+<transform DEF='Viewpoint-Left' id='x3d_viewpoint_left' translation='0 0 0' rotation='0 1 0 0'>
+<transform DEF='Viewpoint-alpha' id='x3d_viewpointL_alpha' translation='0 0 0' rotation='0 0 1 0'>
+<transform translation='0 0 0'>
+<script>
+	document.write("<inline onload=fitCamera('"+left_id+"') url='"+the_model+"'></inline>"); 
+</script>
+</transform>
+</transform>
+</transform>
+</scene>
+</x3d>
+</x3d>
+<!-- RIGHT EYE VIEWPORT -->
+<script>
+document.write("<x3d id='"+right_id+"' showStat='false' showLog='false' x='0px' y='0px' width='"+x3dWidth+"px' height='"+x3dHeight+"px'>");
+</script>
+<scene>
+<navigationInfo type='"EXAMINE"'></navigationInfo>
+<transform translation='0 0 10' rotation='0 1 0 0'>
+<viewpoint DEF='Viewpoint' id='x3d_viewpointR' position='.1 0 0' orientation='0 1 0 .05'></viewpoint>
+</transform>
+<transform DEF='Viewpoint-Right' id='x3d_viewpoint_right' translation='0 0 0' rotation='0 1 0 0'>
+<transform DEF='Viewpoint-alpha' id='x3d_viewpointR_alpha' translation='0 0 0' rotation='0 0 1 0'>
+<transform translation='0 0 0'>	
+<script>
+	document.write("<inline onload=fitCamera('"+right_id+"') url='"+the_model+"'></inline>"); 
+</script>
+</transform>
+</transform>
+</transform>
+</scene>
+</x3d>
+</div>
+
+<script>
+// ******************************************
+// --> Based on the code example provided @ http://realism.com/x3d-examples/HTML5-Fall2014/stereo/kelpie.html
+var previousAngles = {'alpha':0, 'beta':0, 'gamma':0};
+var vectors = {'alpha':"0 1 0 ", 'beta':"1 0 0 ", 'gamma':"0 0 1 "};
+var deg2rad = Math.PI / 180;
+
+if (window.DeviceOrientationEvent) {
+	window.addEventListener('deviceorientation', function(eventData) {
+		alpha = 360-eventData.alpha;
+		rotate (alpha, 'alpha');
+	}, false);
+} else {
+	alert ('The current mobile device does not have a motion sensor enabled');
+}
+
+function rotate (angle1, label1) {
+	intAngle1 = Math.floor(angle1);
+	if (intAngle1 == previousAngles[label1]) {return; }
+	previousAngles[label1] = intAngle1;
+	rotateView ("x3d_viewpointR_"+label1, vectors[label1]+" "+intAngle1*deg2rad);
+	rotateView ("x3d_viewpointL_"+label1, vectors[label1]+" "+intAngle1*deg2rad);
+	
+}
+function rotateView (label, vector) {
+	view = document.getElementById(label);
+	view.setAttribute('set_rotation',vector);
+}
+// ******************************************
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!--
+  Generic x3d viewer to display 3D content on the web
+  This code displays a single X3D file on a web browser 
+  and has the option to open another browser window 
+  to display a twin view of the model for cardboard VR usage
+  
+  usage: view3d.html?the_model=MODEL.X3D&the_cardboardmodel=MODEL_LOW.X3D
+  * it is adviced to use a low complexity model for the cardboard view
+  
+  © 2017 George Pavlidis
+-->
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html;charset=utf-8'></meta>
+<link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>
+<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'></script>
+<style>
+body { 
+	background: url('images/back.jpg') no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+#3d_model {
+	x: 0px;
+	y: 0px;
+	width: 100%;
+	height: 100%;
+	border: none;
+	display: block;
+	position: absolute;
+}
+</style>
+<script>
+// Read the URL parameters for the 3D models to show
+function getUrlVars() {
+	var vars = {};
+	var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, 
+		function(m,key,value) { vars[key] = value; });
+	return vars;
+}
+var the_model = unescape(getUrlVars()["the_model"]);
+var the_cardboard_model = unescape(getUrlVars()["the_cardboard_model"]);
+// Fit object to screen
+function fitCamera(the_view) {
+	var x3dElem = document.getElementById(the_view);
+	x3dElem.runtime.fitAll();
+	x3dElem.addEventListener("downloadsfinished", function() {x3dElem.runtime.fitAll();});
+}
+</script>
+</head>
+
+<body bgcolor=white text=black leftmargin=0 topmargin=0 marginwidth=0 marginheight=0>
+
+<div style="position:absolute; top:10px; left:10px; font-size:50px; z-index:100;">
+<img src="images/reset.png" style="height:33px;"><br>
+<img src="images/view_all.png" style="height:33px;"><br>
+<img src="images/rendering.png" style="height:33px;"><br>
+<form action="cardboardVR.html" method="GET" target="_blank">
+<script>
+document.write('<input type="hidden" name="the_cardboard_model" value="'+the_cardboard_model+'">');
+</script>
+<input type="image" src="images/cardboard.png" style="height:50px;">
+</form>
+</div>
+
+<x3d id='3d_model' showStat='false' showProgress='bar' showLog='false'>
+<scene>
+<navigationInfo type="'EXAMINE'" headlight="false"></navigationInfo>
+<Background transparency="1" ></Background> 
+<script>
+document.write('<inline onload=fitCamera("3d_model") url="'+the_model+'" ></inline>');
+</script>
+<scene>
+</x3d>
+
+</body>
+</html>
