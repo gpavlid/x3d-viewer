@@ -1,0 +1,12 @@
+  Generic x3d viewer to display 3D content on the web
+  This code displays a single X3D file on a web browser 
+  and has the option to open another browser window 
+  to display a twin view of the model for cardboard VR usage
+  
+  usage: view3d.html?the_model=MODEL.X3D&the_cardboardmodel=MODEL_LOW.X3D
+  * it is adviced to use a low complexity model for the cardboard view
+  
+  parts of this code are based on the code example provided @
+  http://realism.com/x3d-examples/HTML5-Fall2014/stereo/kelpie.html
+  
+  © 2017 George Pavlidis
